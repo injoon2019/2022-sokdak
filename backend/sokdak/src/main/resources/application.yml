@@ -23,3 +23,8 @@ logging:
     org:
       hibernate:
         type: trace
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8

@@ -9,6 +9,9 @@ public class PostsResponse {
     private List<PostResponse> posts;
     private boolean lastPage;
 
+    public PostsResponse() {
+    }
+
     public PostsResponse(List<PostResponse> posts, boolean lastPage) {
         this.posts = posts;
         this.lastPage = lastPage;

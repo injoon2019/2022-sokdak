@@ -4,20 +4,48 @@ import static com.wooteco.sokdak.post.util.HttpMethodFixture.getExceptionMessage
 import static com.wooteco.sokdak.post.util.HttpMethodFixture.httpGet;
 import static com.wooteco.sokdak.post.util.HttpMethodFixture.httpPost;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document;
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration;
 
 import com.wooteco.sokdak.post.acceptance.AcceptanceTest;
 import com.wooteco.sokdak.post.dto.NewPostRequest;
 import com.wooteco.sokdak.post.dto.PostResponse;
 import com.wooteco.sokdak.post.dto.PostsResponse;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.ManualRestDocumentation;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
+@AutoConfigureRestDocs
+@ExtendWith(RestDocumentationExtension.class)
 class PostControllerTest extends AcceptanceTest {
+
+    private RequestSpecification spec;
+
+    @BeforeEach
+    public void setUp(RestDocumentationContextProvider restDocumentation) {
+        this.spec = new RequestSpecBuilder()
+                //.addFilter(documentationConfiguration(restDocumentation).snippets().withEncoding("UTF-8"))
+                .addFilter(documentationConfiguration(restDocumentation).snippets().withEncoding("UTF-8"))
+                .build();
+    }
 
     @Autowired
     PostController postController;
@@ -40,7 +68,13 @@ class PostControllerTest extends AcceptanceTest {
         NewPostRequest postRequest = new NewPostRequest("제목", "본문");
         httpPost(postRequest, "/posts");
 
-        ExtractableResponse<Response> response = httpGet("/posts?size=3&page=0");
+        //ExtractableResponse<Response> response = httpGet("/posts?size=3&page=0");
+        ExtractableResponse<Response> response = RestAssured.given(this.spec)
+                .accept("application/json")
+                .filter(document("index"))
+                .when().get("/posts?size=3&page=0")
+                .then().extract();
+
         PostsResponse postsResponse = response.jsonPath()
                 .getObject(".", PostsResponse.class);
 

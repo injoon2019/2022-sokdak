@@ -11,6 +11,9 @@ public class PostResponse {
     private String content;
     private DateResponse localDate;
 
+    public PostResponse() {
+    }
+
     private PostResponse(Long id, String title, String content, DateResponse localDate) {
         this.id = id;
         this.title = title;

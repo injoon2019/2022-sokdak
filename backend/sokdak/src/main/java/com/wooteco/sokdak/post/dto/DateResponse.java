@@ -13,6 +13,9 @@ public class DateResponse {
     private String date;
     private String time;
 
+    public DateResponse() {
+    }
+
     private DateResponse(String date, String time) {
         this.date = date;
         this.time = time;
